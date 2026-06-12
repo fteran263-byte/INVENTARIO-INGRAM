@@ -1,0 +1,686 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+	<head>
+    <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+    <!-- PWA -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#1e3a8a">
+
+    <title>Torre de Control SAP v24.9 - Stock Corregido</title>
+    	<style>
+        :root {
+            --primary: #1e3a8a;
+            --primary-dark: #1e40af;
+            --secondary: #64748b;
+            --success: #10b981;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --info: #3b82f6;
+            --background: #f8fafc;
+            --card-bg: #ffffff;
+            --text-main: #1e293b;
+            --text-muted: #64748b;
+            --border: #e2e8f0;
+            --radius: 12px;
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', -apple-system, sans-serif; }
+        body { background-color: var(--background); color: var(--text-main); line-height: 1.5; }
+
+        .header { background: var(--primary); color: white; padding: 1rem 2rem; display: flex; justify-content: space-between; align-items: center; box-shadow: var(--shadow); }
+        .header h1 { font-size: 1.25rem; display: flex; align-items: center; gap: 0.75rem; }
+        .container { max-width: 1300px; margin: 2rem auto; padding: 0 1.5rem; }
+
+        .card { background: var(--card-bg); border-radius: var(--radius); padding: 1.5rem; box-shadow: var(--shadow); margin-bottom: 1.5rem; border: 1px solid var(--border); }
+        .card-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem; padding-bottom: 1rem; border-bottom: 1px solid var(--border); }
+
+        .tabs { display: flex; gap: 0.5rem; margin-bottom: 2rem; border-bottom: 2px solid var(--border); overflow-x: auto; }
+        .tab { padding: 0.75rem 1.25rem; cursor: pointer; font-weight: 500; color: var(--text-muted); border-bottom: 3px solid transparent; transition: all 0.2s; white-space: nowrap; }
+        .tab.active { color: var(--primary); border-bottom-color: var(--primary); font-weight: 600; }
+
+        .btn { display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem; padding: 0.625rem 1.25rem; border-radius: 8px; font-weight: 600; cursor: pointer; border: none; font-size: 0.9rem; transition: background 0.2s; }
+        .btn-primary { background: var(--primary); color: white; }
+        .btn-primary:hover { background: var(--primary-dark); }
+        .btn-success { background: var(--success); color: white; }
+        .btn-danger { background: var(--danger); color: white; }
+        .btn-warning { background: var(--warning); color: white; }
+        .btn-outline { background: transparent; border: 1px solid var(--border); color: var(--text-main); }
+
+        input, select { width: 100%; padding: 0.75rem; border: 1px solid var(--border); border-radius: 8px; font-size: 1rem; color: var(--text-main); }
+        label { display: block; font-size: 0.875rem; font-weight: 600; margin-bottom: 0.5rem; }
+
+        .table-container { overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; font-size: 0.875rem; }
+        th { background: var(--background); text-align: left; padding: 0.75rem 1rem; border-bottom: 2px solid var(--border); color: var(--text-muted); font-weight: 600; }
+        td { padding: 0.75rem 1rem; border-bottom: 1px solid var(--border); }
+
+        .badge { display: inline-flex; padding: 0.25rem 0.75rem; border-radius: 9999px; font-size: 0.75rem; font-weight: 600; align-items: center; gap: 4px; }
+        .badge-primary { background: #dbeafe; color: #1e40af; }
+        .badge-success { background: #dcfce7; color: #166534; }
+        .badge-danger { background: #fee2e2; color: #991b1b; }
+        .badge-warning { background: #fef3c7; color: #92400e; }
+        .badge-info { background: #e0f2fe; color: #0369a1; }
+
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1rem; margin-bottom: 1.5rem; }
+        .stat-card { background: var(--card-bg); padding: 1.25rem; border-radius: var(--radius); text-align: center; border: 1px solid var(--border); box-shadow: var(--shadow); }
+        .stat-value { font-size: 1.75rem; font-weight: 700; color: var(--primary); }
+        .stat-label { font-size: 0.75rem; font-weight: 600; color: var(--text-muted); margin-top: 0.25rem; }
+
+        .progress-bar { width: 100%; height: 8px; background: #e2e8f0; border-radius: 4px; margin-top: 0.5rem; overflow: hidden; }
+        .progress-fill { height: 100%; background: var(--success); transition: width 0.3s; }
+
+        .pasillo-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 1rem; }
+        .pasillo-card { padding: 1.5rem; background: white; border: 2px solid var(--border); border-radius: var(--radius); cursor: pointer; text-align: center; box-shadow: var(--shadow); }
+        .conteo-area { max-width: 600px; margin: 0 auto; }
+        .ubi-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1.5rem; }
+
+        .hidden { display: none !important; }
+        .login-screen { min-height: 100vh; display: flex; align-items: center; justify-content: center; background: #f1f5f9; }
+    </style>
+    <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
+</head>
+<body>
+
+<div id="loginScreen" class="login-screen">
+    <div class="card" style="width: 400px; padding: 2.5rem;">
+        <div style="text-align: center; margin-bottom: 2rem;">
+            <div style="font-size: 3rem;">📦</div>
+            <h2>Control de Inventario</h2>
+            <p style="color: var(--text-muted); font-size: 0.875rem;">Módulo de Inventario Unificado</p>
+        </div>
+        <div class="form-group" style="margin-bottom: 1.25rem;">
+            <label>Contador de Turno</label>
+            <select id="loginUserSelect"><option value="">Selecciona usuario...</option></select>
+        </div>
+        <button class="btn btn-success" style="width: 100%; margin-bottom: 1.5rem;" onclick="login('contador')">Entrar como Contador</button>
+        <div style="margin: 1.5rem 0; border-top: 1px solid var(--border); position: relative; text-align: center;">
+            <span style="position: absolute; top: -10px; left: 50%; transform: translateX(-50%); background: #f1f5f9; padding: 0 15px; font-size: 0.85rem; color: var(--primary);">Panel Supervisor</span>
+        </div>
+        <input type="password" id="adminPass" placeholder="Clave Admin" style="margin-bottom: 1rem;">
+        <button class="btn btn-primary" style="width: 100%;" onclick="login('admin')">Acceso Admin</button>
+    </div>
+</div>
+
+<div id="mainApp" class="hidden">
+    <header class="header">
+        <h1>📦 Torre de Control <span style="font-size: 0.85rem; opacity: 0.8;">v24.9 Global</span></h1>
+        <div class="user-info" style="display: flex; align-items: center; gap: 1rem;">
+            <div class="user-name" id="displayUserName" style="color: white; font-weight: 600;">Usuario</div>
+            <button class="btn btn-outline" style="color: white; border-color: rgba(255,255,255,0.3); padding: 0.4rem 0.8rem;" onclick="logout()">🚪 Salir</button>
+        </div>
+    </header>
+
+    <div class="container">
+        <nav class="tabs id-admin" id="adminTabs">
+            <div class="tab active" data-tab="dashboard">📊 Dashboard General</div>
+            <div class="tab" data-tab="inventario">📦 Maestro de Stock</div>
+            <div class="tab" data-tab="usuarios">👥 Tiempos y Operarios</div>
+            <div class="tab" data-tab="historial">🕒 Log Completo</div>
+            <div class="tab" data-tab="reportes">📈 Discrepancias / XLS</div>
+        </nav>
+        <nav class="tabs hidden" id="contadorTabs">
+            <div class="tab active" data-tab="mis-pasillos">🏗️ Mis Pasillos</div>
+            <div class="tab" data-tab="mi-progreso">📈 Mi Progreso</div>
+        </nav>
+
+        <section id="tab-dashboard" class="tab-content">
+            <div class="stats-grid">
+                <div class="stat-card"><div class="stat-value" id="stat-total-items">0</div><div class="stat-label">SKUs TOTALES</div></div>
+                <div class="stat-card"><div class="stat-value" id="stat-total-progress">0%</div><div class="stat-label">AVANCE NETO</div></div>
+                <div class="stat-card"><div class="stat-value" id="stat-accuracy">100%</div><div class="stat-label">EXACTITUD (ERI)</div></div>
+                <div class="stat-card"><div class="stat-value" id="stat-differences" style="color: var(--danger);">0</div><div class="stat-label">DISCREPANCIAS</div></div>
+            </div>
+            <div class="card">
+                <h3>Carga de Archivo Maestro de Datos (SAP)</h3>
+                <div style="display: flex; flex-wrap: wrap; gap: 1rem; margin-top: 1rem;">
+                    <button class="btn btn-primary" onclick="document.getElementById('fileInput').click()">📤 Importar Excel SAP</button>
+                    <button class="btn btn-danger" onclick="resetSystem()">🗑️ Reiniciar Datos / Inventario</button>
+                    <input type="file" id="fileInput" class="hidden" accept=".xlsx,.xls,.xlsm" onchange="handleFileUpload(event)">
+                </div>
+                <div id="importStatus" style="margin-top:1rem;"></div>
+            </div>
+        </section>
+
+        <section id="tab-inventario" class="tab-content hidden">
+            <div class="card">
+                <input type="text" id="searchInv" placeholder="🔍 Filtrar por SKU o Ubicación..." onkeyup="filterInventory()" style="margin-bottom: 1rem;">
+                <div class="table-container"><table><thead><tr><th>Pasillo</th><th>Ubicación</th><th>Nivel</th><th>SKU Material</th><th>Teórico SAP</th></tr></thead><tbody id="inventoryTableBody"></tbody></table></div>
+            </div>
+        </section>
+
+        <section id="tab-usuarios" class="tab-content hidden">
+            <div class="card">
+                <h3>Alta de Operario / Modificar Asignación</h3>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1rem; margin: 1rem 0;">
+                    <div><label>Nombre Operario</label><input type="text" id="newUserNombre" placeholder="Ej: FRANCO"></div>
+                    <div><label>Pasillos Asignados (Ej: 17)</label><input type="text" id="newUserPasillos" placeholder="Ej: 17"></div>
+                    <div>
+                        <label>Nivel de Estante</label>
+                        <select id="newUserNivel">
+                            <option value="TODOS">Todos los Niveles</option>
+                            <option value="A">Nivel A</option>
+                            <option value="B">Nivel B</option>
+                            <option value="C">Nivel C</option>
+                            <option value="D">Nivel D</option>
+                        </select>
+                    </div>
+                </div>
+                <button class="btn btn-primary" onclick="addUser()">Registrar o Modificar Contador</button>
+            </div>
+            <div class="card">
+                <h3>Métricas de Tiempo Real y Control de Operarios</h3>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Nombre Operario</th>
+                                <th>Pasillos</th>
+                                <th>Nivel</th>
+                                <th>Avance</th>
+                                <th>Promedio por SKU</th>
+                                <th>Tiempo Total Asignación</th>
+                                <th>Calidad FTR</th>
+                                <th>Acción</th>
+                            </tr>
+                        </thead>
+                        <tbody id="usersTableBody"></tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <section id="tab-historial" class="tab-content hidden">
+            <div class="card">
+                <div class="table-container"><table><thead><tr><th>Hora Registro</th><th>Usuario</th><th>Ubicación</th><th>Material</th><th>Contado</th><th>Resultado</th><th>Tiempo Tomado</th></tr></thead><tbody id="historyTableBody"></tbody></table></div>
+            </div>
+        </section>
+
+        <section id="tab-reportes" class="tab-content hidden">
+
+    <div class="card">
+
+        <!-- ✅ AQUÍ VA EL BOTÓN -->
+        <div style="margin-bottom:10px;">
+            <button class="btn btn-success" onclick="exportarExcel()">
+                ⬇️ Descargar XLS Discrepancias
+            </button>
+        </div>
+
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Ubicación</th>
+                        <th>SKU / Material</th>
+                        <th>Teórico SAP</th>
+                        <th>Físico Contado</th>
+                        <th>Diferencia</th>
+                        <th>Intentos</th>
+                        <th>Acción</th>
+                    </tr>
+                </thead>
+                <tbody id="diffTableBody"></tbody>
+            </table>
+        </div>
+
+    </div>
+
+</section>
+		
+                <div class="table-container"><table><thead><tr><th>Ubicación</th><th>SKU / Material</th><th>Teórico SAP</th><th>Físico Contado</th><th>Diferencia</th><th>Intentos</th><th>Acción</th></tr></thead><tbody id="diffTableBody"></tbody></table></div>
+            </div>
+        </section>
+
+        <section id="tab-mis-pasillos" class="tab-content hidden">
+            <div class="pasillo-grid" id="misPasillosGrid"></div>
+        </section>
+        
+        <section id="tab-mi-progreso" class="tab-content hidden">
+            <div class="stats-grid">
+                <div class="stat-card"><div class="stat-value" id="user-stat-registrados">0</div><div class="stat-label">SKUs REGISTRADOS</div></div>
+                <div class="stat-card"><div class="stat-value" id="user-stat-pendientes" style="color: var(--warning);">0</div><div class="stat-label">SKUs PENDIENTES</div></div>
+                <div class="stat-card"><div class="stat-value" id="user-stat-tiempo-acumulado" style="color: var(--info);">0s</div><div class="stat-label">TIEMPO TOTAL EN CURSO</div></div>
+            </div>
+        </section>
+        
+        <section id="tab-conteo-flow" class="tab-content hidden"><div class="conteo-area"><button class="btn btn-outline" onclick="showTab('mis-pasillos')" style="margin-bottom: 1rem;">← Volver</button><div class="card" id="conteoContent"></div></div></section>
+    </div>
+</div>
+
+<script>
+    let DB = {
+        inventario: [], usuarios: [], conteos: [],
+        config: { adminPass: 'Franco2026' }
+    };
+    
+    let currentUser = null, currentPasillo = null, currentProdIndex = 0, filteredProds = [];
+    let timeUbiStart = null;
+
+    function init() {
+        const saved = localStorage.getItem('inventarioDB_v24_9');
+        if (saved) {
+            DB = JSON.parse(saved);
+        } else {
+            DB.usuarios = [
+                { nombre: 'FRANCO', pasillos: ['17'], niveles: 'TODOS', patron: '17' },
+                { nombre: 'RAUL', pasillos: ['18'], niveles: 'TODOS', patron: '18' }
+            ];
+            localStorage.setItem('inventarioDB_v24_9', JSON.stringify(DB));
+        }
+        updateLoginSelect();
+        setupTabs();
+        updateStats();
+    }
+
+    function save() {
+        localStorage.setItem('inventarioDB_v24_9', JSON.stringify(DB));
+        updateStats();
+        if(currentUser && currentUser.role === 'admin') renderUsers();
+    }
+
+    function updateLoginSelect() {
+        const select = document.getElementById('loginUserSelect');
+        if(select) {
+            select.innerHTML = '<option value="">Selecciona usuario...</option>';
+            DB.usuarios.forEach(u => select.innerHTML += `<option value="${u.nombre}">${u.nombre}</option>`);
+        }
+    }
+
+    function login(type) {
+        if (type === 'admin') {
+            const pass = document.getElementById('adminPass').value;
+            if (pass !== DB.config.adminPass) return alert('Clave incorrecta');
+            currentUser = { nombre: 'Admin', role: 'admin' };
+        } else {
+            const name = document.getElementById('loginUserSelect').value;
+            if (!name) return alert('Selecciona un usuario');
+            const user = DB.usuarios.find(u => u.nombre === name);
+            currentUser = { ...user, role: 'contador' };
+        }
+        document.getElementById('loginScreen').classList.add('hidden');
+        document.getElementById('mainApp').classList.remove('hidden');
+        document.getElementById('displayUserName').textContent = currentUser.nombre;
+        
+        if(currentUser.role === 'admin') {
+            document.getElementById('adminTabs').classList.remove('hidden');
+            document.getElementById('contadorTabs').classList.add('hidden');
+            showTab('dashboard');
+        } else {
+            document.getElementById('adminTabs').classList.add('hidden');
+            document.getElementById('contadorTabs').classList.remove('hidden');
+            showTab('mis-pasillos');
+        }
+    }
+
+    function logout() { location.reload(); }
+    function setupTabs() { document.querySelectorAll('.tab').forEach(tab => tab.addEventListener('click', () => showTab(tab.getAttribute('data-tab')))); }
+
+    function showTab(tabId) {
+        document.querySelectorAll('.tab-content').forEach(c => c.classList.add('hidden'));
+        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+        document.getElementById('tab-' + tabId).classList.remove('hidden');
+        const tBtn = document.querySelector(`.tab[data-tab="${tabId}"]`);
+        if (tBtn) tBtn.classList.add('active');
+        
+        if (tabId === 'inventario') renderInventory();
+        if (tabId === 'usuarios') renderUsers();
+        if (tabId === 'historial') renderHistory();
+        if (tabId === 'reportes') renderReports();
+        if (tabId === 'mis-pasillos') renderPasillos();
+        if (tabId === 'mi-progreso') renderUserProgress();
+    }
+
+    // --- SINCRO Y MAPEO DIRECTO DE TU COLUMNA "TEÓRICO SAP" ---
+function limpiarNum(v) {
+    if (v === null || v === undefined || v === '') return '0'; // O devuelve '' si prefieres que se vea vacío
+    
+    // Si ya es número, devuélvelo como string para que se muestre igual en pantalla
+    if (typeof v === 'number') return v.toString(); 
+    
+    let s = String(v).trim();
+    
+    // Solo quitamos espacios. NO eliminamos caracteres extraños agresivamente
+    s = s.replace(/\s/g, ''); 
+    
+    // Verificamos si lo que queda es un número válido
+    const num = parseFloat(s.replace(',', '.'));
+    
+    // Si no es un número, devolvemos el valor original (así no pierdes visibilidad)
+    return isNaN(num) ? v : s;
+}
+    function handleFileUpload(event) {
+        const file = event.target.files[0];
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            try {
+                const workbook = XLSX.read(new Uint8Array(e.target.result), { type: 'array' });
+                const rows = XLSX.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[0]]);
+                
+             DB.inventario = rows.map(row => {
+
+    // ✅ 1. LIMPIA COLUMNAS (AQUÍ VA)
+    const cleanRow = {};
+    Object.keys(row).forEach(k => {
+        cleanRow[k.trim()] = row[k];
+    });
+
+    // ✅ 2. USA cleanRow EN TODO
+    const ubi = String(cleanRow['Ubicación'] || '').trim().toUpperCase();
+    const material = String(cleanRow['Material'] || '').trim();
+
+    // ✅ 3. REEMPLAZA TU LÓGICA STOCK AQUÍ
+    const stockVal = cleanRow['Teórico SAP'] !== undefined ? cleanRow['Teórico SAP'] : 
+                     (cleanRow['Stock sistema'] !== undefined ? cleanRow['Stock sistema'] : 
+                     (cleanRow['Stock'] !== undefined ? cleanRow['Stock'] : 0));
+
+    const nivel = String(cleanRow['Nivel'] || ubi.slice(-1) || 'A').toUpperCase();
+    const pasillo = String(cleanRow['Pasillo'] || '').padStart(2, '0');
+
+    return {
+        ubicacion: ubi,
+        material: material,
+        stock: limpiarNum(stockVal),
+        nivel: nivel,
+        pasillo: pasillo
+    };
+
+})
+.filter(r => r.ubicacion && r.material && r.material !== '0');
+
+                
+                save();
+                document.getElementById('importStatus').innerHTML = `<span class="badge badge-success">✅ Base SAP Cargada: ${DB.inventario.length} registros.</span>`;
+            } catch(err) { alert('Error leyendo archivo: ' + err.message); }
+        };
+        reader.readAsArrayBuffer(file);
+    }
+
+    function addUser() {
+        const nombre = document.getElementById('newUserNombre').value.trim().toUpperCase();
+        const pasillosRaw = document.getElementById('newUserPasillos').value.trim();
+        const nivel = document.getElementById('newUserNivel').value;
+        if (!nombre || !pasillosRaw) return alert('Por favor rellene el Nombre y Pasillos');
+        
+        let pasillos = pasillosRaw.split(',').map(p => p.trim().padStart(2, '0'));
+        const existeIndex = DB.usuarios.findIndex(u => u.nombre === nombre);
+        
+        if(existeIndex !== -1) {
+            DB.usuarios[existeIndex].pasillos = pasillos;
+            DB.usuarios[existeIndex].niveles = nivel;
+            DB.usuarios[existeIndex].patron = pasillosRaw;
+            alert(`¡Asignación de ${nombre} modificada!`);
+        } else {
+            DB.usuarios.push({ nombre, pasillos, niveles: nivel, patron: pasillosRaw });
+            alert(`Operario ${nombre} registrado.`);
+        }
+        
+        document.getElementById('newUserNombre').value = '';
+        document.getElementById('newUserPasillos').value = '';
+        updateLoginSelect();
+        save();
+        renderUsers();
+    }
+
+    function removeUser(nombre) {
+        if(confirm(`¿Quitar a ${nombre} de la asignación de operarios?`)) {
+            DB.usuarios = DB.usuarios.filter(u => u.nombre !== nombre);
+            updateLoginSelect();
+            save();
+            renderUsers();
+        }
+    }
+
+    function renderUsers() {
+        const tbody = document.getElementById('usersTableBody'); 
+        if(!tbody) return; tbody.innerHTML = '';
+        
+        DB.usuarios.forEach(u => {
+            const totalAsignados = DB.inventario.filter(i => u.pasillos.includes(i.pasillo) && (u.niveles === 'TODOS' || i.nivel === u.niveles)).length || 5;
+            const misConteos = DB.conteos.filter(c => c.usuario === u.nombre);
+            const exitosos = new Set(misConteos.filter(c => c.resultado === 'OK').map(c => `${c.ubicacion}_${c.material}`));
+            
+            const cantCompletados = exitosos.size;
+            const pctAvance = Math.round((cantCompletados / totalAsignados) * 100) || 0;
+
+            let sumaTiemposSegundos = 0;
+            misConteos.forEach(c => { if(c.segundosTomados) sumaTiemposSegundos += c.segundosTomados; });
+            const promPorSku = misConteos.length > 0 ? Math.round(sumaTiemposSegundos / misConteos.length) : 0;
+            
+            let tiempoTotalStr = "0m";
+            if(sumaTiemposSegundos > 0) {
+                tiempoTotalStr = `${Math.floor(sumaTiemposSegundos / 60)}m ${sumaTiemposSegundos % 60}s`;
+            }
+
+            tbody.innerHTML += `<tr>
+                <td><strong>${u.nombre}</strong></td>
+                <td>Pasillo ${u.patron}</td>
+                <td><span class="badge badge-info">${u.niveles}</span></td>
+                <td>
+                    <div style="display:flex;align-items:center;gap:8px;">
+                        <div class="progress-bar" style="flex:1; margin:0; width:70px;"><div class="progress-fill" style="width:${pctAvance}%"></div></div>
+                        <span>${pctAvance}%</span>
+                    </div>
+                </td>
+                <td><span class="badge badge-info">⏱️ ${promPorSku}s / SKU</span></td>
+                <td><span class="badge badge-primary">⏳ Real: ${tiempoTotalStr}</span></td>
+                <td><span class="badge badge-success">100% FTR</span></td>
+                <td><button class="btn btn-danger" style="padding:4px 8px; font-size:11px;" onclick="removeUser('${u.nombre}')">❌ Quitar</button></td>
+            </tr>`;
+        });
+    }
+
+    function resetSystem() {
+        if (confirm('🚨 ATENCIÓN SUPERVISOR: Esto borrará el maestro SAP cargado y todo el historial de conteos de hoy. ¿Continuar?')) {
+            DB.inventario = [];
+            DB.conteos = [];
+            localStorage.setItem('inventarioDB_v24_9', JSON.stringify(DB));
+            alert('¡Base e historial limpiados! Sistema listo.');
+            location.reload();
+        }
+    }
+
+    function renderUserProgress() {
+        if (!currentUser) return;
+        const totalItems = DB.inventario.filter(i => currentUser.pasillos.includes(i.pasillo) && (currentUser.niveles === 'TODOS' || i.nivel === currentUser.niveles)).length || 0;
+        const misConteos = DB.conteos.filter(c => c.usuario === currentUser.nombre && c.resultado === 'OK');
+        const completados = new Set(misConteos.map(c => `${c.ubicacion}_${c.material}`)).size;
+        const pendientes = Math.max(0, totalItems - completados);
+
+        let sumaTiempos = 0;
+        DB.conteos.filter(c => c.usuario === currentUser.nombre).forEach(c => { if(c.segundosTomados) sumaTiempos += c.segundosTomados; });
+        
+        document.getElementById('user-stat-registrados').textContent = completados;
+        document.getElementById('user-stat-pendientes').textContent = pendientes;
+        document.getElementById('user-stat-tiempo-acumulado').textContent = `${Math.floor(sumaTiempos / 60)}m ${sumaTiempos % 60}s`;
+    }
+
+    function renderInventory(dataToRender = null) {
+        const tbody = document.getElementById('inventoryTableBody'); tbody.innerHTML = '';
+        const data = dataToRender || DB.inventario;
+        if(data.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:1rem; color:var(--text-muted)">No hay registros cargados. Sube un archivo Excel SAP.</td></tr>';
+            return;
+        }
+        data.forEach(i => {
+            tbody.innerHTML += `<tr><td><span class="badge badge-primary">${i.pasillo}</span></td><td>${i.ubicacion}</td><td>${i.nivel}</td><td><strong>${i.material}</strong></td><td>${i.stock}</td></tr>`;
+        });
+    }
+
+    function renderHistory() {
+        const tbody = document.getElementById('historyTableBody'); tbody.innerHTML = '';
+        DB.conteos.slice().reverse().forEach(c => {
+            tbody.innerHTML += `<tr>
+                <td><small>${c.fecha}</small></td>
+                <td>${c.usuario}</td>
+                <td>${c.ubicacion}</td>
+                <td>${c.material}</td>
+                <td><strong>${c.contado}</strong></td>
+                <td><span class="badge ${c.resultado==='OK'?'badge-success':'badge-danger'}">${c.resultado}</span></td>
+                <td><span class="badge badge-info">⏱️ ${c.segundosTomados || 0}s</span></td>
+            </tr>`;
+        });
+    }
+
+    function renderPasillos() {
+        const grid = document.getElementById('misPasillosGrid'); grid.innerHTML = '';
+        if(!currentUser || !currentUser.pasillos) return;
+        currentUser.pasillos.forEach(p => {
+            grid.innerHTML += `<div class="pasillo-card" onclick="startConteo('${p}')"><h3>Pasillo ${p}</h3><p style="font-size:0.75rem;color:var(--text-muted);">Abrir ubicaciones asignadas</p></div>`;
+        });
+    }
+
+    function startConteo(pasillo) {
+        currentPasillo = pasillo;
+        const resueltos = new Set(DB.conteos.filter(c => c.resultado === 'OK').map(c => `${c.ubicacion}_${c.material}`));
+        
+        filteredProds = DB.inventario.filter(i => i.pasillo === pasillo && (currentUser.niveles === 'TODOS' || i.nivel === currentUser.niveles) && !resueltos.has(`${i.ubicacion}_${i.material}`));
+        
+        if(filteredProds.length === 0 && pasillo === '17') {
+            filteredProds = [
+                { ubicacion: 'M1741A', material: 'W9037MC', stock: 36, pasillo: '17', nivel: 'A' },
+                { ubicacion: 'M1742A', material: 'W9063MC', stock: 120, pasillo: '17', nivel: 'A' },
+                { ubicacion: 'M1743A', material: 'W9031MC', stock: 126, pasillo: '17', nivel: 'A' },
+                { ubicacion: 'M1744A', material: 'CF363XC', stock: 69, pasillo: '17', nivel: 'A' }
+            ].filter(i => !resueltos.has(`${i.ubicacion}_${i.material}`));
+        }
+
+        currentProdIndex = 0; showTab('conteo-flow'); renderCurrentProduct();
+    }
+
+    function renderCurrentProduct() {
+    const container = document.getElementById('conteoContent');
+    if (currentProdIndex >= filteredProds.length) {
+        container.innerHTML = `<div style="text-align:center;padding:2rem;"><h3>🎉 ¡Asignación Completa!</h3><br><button class="btn btn-primary" onclick="showTab('mis-pasillos')">Volver</button></div>`; return;
+    }
+    const p = filteredProds[currentProdIndex];
+    timeUbiStart = Date.now(); 
+
+    // --- PEGA EL CÓDIGO AQUÍ ---
+    container.innerHTML = `
+        <div class="ubi-header">
+            <div><small style="color:var(--text-muted);font-weight:700;">UBICACIÓN</small><h2 style="font-size:2.5rem;color:var(--primary); font-weight:800;">${p.ubicacion}</h2></div>
+            <div style="text-align:right;"><small style="color:var(--text-muted);font-weight:700;">PN / MATERIAL</small><div style="font-size:1.4rem;background:#fff7ed;color:#ea580c;padding:4px 10px;border-radius:6px;font-weight:800;">${p.material}</div></div>
+        </div>
+        <div style="margin:1.5rem 0;">
+            <label style="font-weight:700;color:var(--text-muted);display:block;margin-bottom:8px;">CANTIDAD CONTADA:</label>
+            
+            <input type="number" id="countInput" inputmode="numeric" pattern="[0-9]*" 
+                   style="width:100%; height:80px; font-size:3rem; text-align:center; border: 2px solid var(--primary);" 
+                   placeholder="0" autofocus>
+            
+            <button class="btn btn-success" style="width:100%; height:80px; font-size:1.5rem; margin-top:0.8rem;" 
+                    onclick="submitCount()">REGISTRAR</button>
+        </div>
+    `;
+    // ----------------------------
+
+    // Esto asegura que al cargar, el teclado se enfoque automáticamente
+    document.getElementById('countInput').focus();
+}
+
+    function submitCount() {
+    const input = document.getElementById('countInput');
+    if (!input) return;
+
+    const valor = parseFloat(input.value);
+    if (isNaN(valor) || valor < 0) return alert('Dato inválido');
+
+    const p = filteredProds[currentProdIndex];
+
+    const intentosPrevios = DB.conteos.filter(c =>
+        c.usuario === currentUser.nombre &&
+        c.ubicacion === p.ubicacion &&
+        c.material === p.material
+    );
+
+    const intentoNum = intentosPrevios.length + 1;
+
+    const isOk = Math.abs(valor - p.stock) < 0.01;
+
+    DB.conteos.push({
+        fecha: new Date().toLocaleTimeString(),
+        usuario: currentUser.nombre,
+        ubicacion: p.ubicacion,
+        material: p.material,
+        sistema: p.stock,
+        contado: valor,
+        resultado: isOk ? 'OK' : 'DIFERENCIA',
+        intento: intentoNum
+    });
+
+    save();
+
+    if (isOk) {
+        alert(`✅ OK en intento ${intentoNum}`);
+        currentProdIndex++;
+    } else if (intentoNum >= 3) {
+        alert(`❌ 3 intentos fallidos. Se registra discrepancia`);
+        currentProdIndex++;
+    } else {
+        alert(`⚠️ Intento ${intentoNum}/3 incorrecto`);
+        return; // se queda en misma ubicación
+    }
+
+    renderCurrentProduct();
+}
+
+    function renderReports() {
+        const tbody = document.getElementById('diffTableBody'); tbody.innerHTML = '';
+        const latest = {}; DB.conteos.forEach(c => { latest[`${c.ubicacion}_${c.material}`] = c; });
+        const discrepancies = Object.values(latest).filter(c => c.resultado !== 'OK');
+        
+        if(discrepancies.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; padding:1.5rem;">🎉 No hay discrepancias en este lote.</td></tr>';
+            return;
+        }
+        discrepancies.forEach(c => {
+            tbody.innerHTML += `<tr>
+                <td><strong>${c.ubicacion}</strong></td>
+                <td>${c.material}</td>
+                <td>${c.sistema}</td>
+                <td>${c.contado}</td>
+                <td style="color:var(--danger); font-weight:700;">${c.contado - c.sistema}</td>
+                <td>3/3</td>
+                <td><button class="btn btn-warning" style="padding:4px 8px;font-size:11px;" onclick="liberarUbi('${c.ubicacion}','${c.material}')">🔑 Liberar</button></td>
+            </tr>`;
+        });
+    }
+
+    function liberarUbi(ubi, mat) {
+        DB.conteos = DB.conteos.filter(c => !(c.ubicacion === ubi && c.material === mat));
+        save(); renderReports(); alert('Ubicación liberada en terminales.');
+    }
+
+    function updateStats() {
+        const total = DB.inventario.length || 0;
+        const latest = {}; DB.conteos.forEach(c => { latest[`${c.ubicacion}_${c.material}`] = c; });
+        const done = Object.values(latest).length;
+        const pct = total > 0 ? Math.round((done / total) * 100) : 0;
+        const diffs = Object.values(latest).filter(c => c.resultado !== 'OK').length;
+
+        if(document.getElementById('stat-total-items')) {
+            document.getElementById('stat-total-items').textContent = total;
+            document.getElementById('stat-total-progress').textContent = pct + '%';
+            document.getElementById('stat-differences').textContent = diffs;
+        }
+    }
+
+    function filterInventory() {
+        const q = document.getElementById('searchInv').value.toLowerCase();
+        const filtered = DB.inventario.filter(i => i.material.toLowerCase().includes(q) || i.ubicacion.toLowerCase().includes(q));
+        renderInventory(filtered);
+    }
+    window.onload = init;
+// ✅ REGISTRO DEL SERVICE WORKER (PWA)
+if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('sw.js')
+    .then(() => console.log('Service Worker OK'))
+    .catch(err => console.log('Error SW', err));
+}
+</script>
+</body>
+</html>
