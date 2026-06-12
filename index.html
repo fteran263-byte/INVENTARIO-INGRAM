@@ -598,9 +598,9 @@ function limpiarNum(v) {
     );
 
     const intentoNum = intentosPrevios.length + 1;
-
     const isOk = Math.abs(valor - p.stock) < 0.01;
 
+    // Guardado Local
     DB.conteos.push({
         fecha: new Date().toLocaleTimeString(),
         usuario: currentUser.nombre,
@@ -612,7 +612,24 @@ function limpiarNum(v) {
         intento: intentoNum
     });
 
-    save();
+    // --- ENVÍO A LA NUBE (Google Sheets) ---
+    const registro = {
+        operario: currentUser.nombre, // Usamos tu variable real de usuario
+        ubicacion: p.ubicacion,      // Usamos el dato real de 'p'
+        material: p.material,        // Usamos el dato real de 'p'
+        stock: valor                 // Usamos el valor validado
+    };
+
+    fetch("https://script.google.com/macros/s/AKfycbyBNSelgov66IuEwDtfteMVlHpLVfeAhGI7TU-WHz20uv26BXJzLYMD-2K3htl3Lw/exec", {
+        method: 'POST',
+        mode: 'no-cors',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(registro)
+    }).catch(err => console.error("Error enviando a Google:", err));
+
+    save(); // Guardar cambios en el almacenamiento local
+    alert('Registro guardado correctamente');
+}
 
     if (isOk) {
         alert(`✅ OK en intento ${intentoNum}`);
