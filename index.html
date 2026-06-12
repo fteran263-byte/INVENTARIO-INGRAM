@@ -639,11 +639,8 @@ function limpiarNum(v) {
         currentProdIndex++;
     } else {
         alert(`⚠️ Intento ${intentoNum}/3 incorrecto`);
-        return; // se queda en misma ubicación
+        return; // Este return ES VÁLIDO porque está dentro del else
     }
-
-    renderCurrentProduct();
-}
 
     function renderReports() {
         const tbody = document.getElementById('diffTableBody'); tbody.innerHTML = '';
