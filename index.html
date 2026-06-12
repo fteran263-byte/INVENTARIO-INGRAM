@@ -590,7 +590,6 @@ function limpiarNum(v) {
     if (isNaN(valor) || valor < 0) return alert('Dato inválido');
 
     const p = filteredProds[currentProdIndex];
-
     const intentosPrevios = DB.conteos.filter(c =>
         c.usuario === currentUser.nombre &&
         c.ubicacion === p.ubicacion &&
@@ -600,7 +599,6 @@ function limpiarNum(v) {
     const intentoNum = intentosPrevios.length + 1;
     const isOk = Math.abs(valor - p.stock) < 0.01;
 
-    // Guardado Local
     DB.conteos.push({
         fecha: new Date().toLocaleTimeString(),
         usuario: currentUser.nombre,
@@ -612,12 +610,24 @@ function limpiarNum(v) {
         intento: intentoNum
     });
 
-    // --- ENVÍO A LA NUBE (Google Sheets) ---
+    if (isOk) {
+        alert(`✅ OK en intento ${intentoNum}`);
+        currentProdIndex++;
+    } else if (intentoNum >= 3) {
+        alert(`❌ 3 intentos fallidos. Se registra discrepancia`);
+        currentProdIndex++;
+    } else {
+        alert(`⚠️ Intento ${intentoNum}/3 incorrecto`);
+        save(); // Guardar antes de retornar
+        return; 
+    }
+
+    // --- ENVÍO A LA NUBE ---
     const registro = {
-        operario: currentUser.nombre, // Usamos tu variable real de usuario
-        ubicacion: p.ubicacion,      // Usamos el dato real de 'p'
-        material: p.material,        // Usamos el dato real de 'p'
-        stock: valor                 // Usamos el valor validado
+        operario: currentUser.nombre,
+        ubicacion: p.ubicacion,
+        material: p.material,
+        stock: valor
     };
 
     fetch("https://script.google.com/macros/s/AKfycbyBNSelgov66IuEwDtfteMVlHpLVfeAhGI7TU-WHz20uv26BXJzLYMD-2K3htl3Lw/exec", {
@@ -625,10 +635,10 @@ function limpiarNum(v) {
         mode: 'no-cors',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(registro)
-    }).catch(err => console.error("Error enviando a Google:", err));
+    }).catch(err => console.error("Error:", err));
 
-    save(); // Guardar cambios en el almacenamiento local
-    alert('Registro guardado correctamente');
+    save();
+    renderCurrentProduct();
 }
 
     if (isOk) {
