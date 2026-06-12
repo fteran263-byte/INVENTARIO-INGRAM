@@ -590,15 +590,8 @@ function limpiarNum(v) {
     if (isNaN(valor) || valor < 0) return alert('Dato inválido');
 
     const p = filteredProds[currentProdIndex];
-    const intentosPrevios = DB.conteos.filter(c =>
-        c.usuario === currentUser.nombre &&
-        c.ubicacion === p.ubicacion &&
-        c.material === p.material
-    );
-
-    const intentoNum = intentosPrevios.length + 1;
-    const isOk = Math.abs(valor - p.stock) < 0.01;
-
+    
+    // 1. Guardado Local
     DB.conteos.push({
         fecha: new Date().toLocaleTimeString(),
         usuario: currentUser.nombre,
@@ -606,23 +599,11 @@ function limpiarNum(v) {
         material: p.material,
         sistema: p.stock,
         contado: valor,
-        resultado: isOk ? 'OK' : 'DIFERENCIA',
-        intento: intentoNum
+        resultado: Math.abs(valor - p.stock) < 0.01 ? 'OK' : 'DIFERENCIA',
+        intento: DB.conteos.filter(c => c.usuario === currentUser.nombre && c.ubicacion === p.ubicacion && c.material === p.material).length + 1
     });
 
-    if (isOk) {
-        alert(`✅ OK en intento ${intentoNum}`);
-        currentProdIndex++;
-    } else if (intentoNum >= 3) {
-        alert(`❌ 3 intentos fallidos. Se registra discrepancia`);
-        currentProdIndex++;
-    } else {
-        alert(`⚠️ Intento ${intentoNum}/3 incorrecto`);
-        save(); // Guardar antes de retornar
-        return; 
-    }
-
-    // --- ENVÍO A LA NUBE ---
+    // 2. Envío a la Nube (Google Sheets)
     const registro = {
         operario: currentUser.nombre,
         ubicacion: p.ubicacion,
@@ -640,40 +621,6 @@ function limpiarNum(v) {
     save();
     renderCurrentProduct();
 }
-
-    if (isOk) {
-        alert(`✅ OK en intento ${intentoNum}`);
-        currentProdIndex++;
-    } else if (intentoNum >= 3) {
-        alert(`❌ 3 intentos fallidos. Se registra discrepancia`);
-        currentProdIndex++;
-    } else {
-        alert(`⚠️ Intento ${intentoNum}/3 incorrecto`);
-        return; // Este return ES VÁLIDO porque está dentro del else
-    }
-
-    function renderReports() {
-        const tbody = document.getElementById('diffTableBody'); tbody.innerHTML = '';
-        const latest = {}; DB.conteos.forEach(c => { latest[`${c.ubicacion}_${c.material}`] = c; });
-        const discrepancies = Object.values(latest).filter(c => c.resultado !== 'OK');
-        
-        if(discrepancies.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; padding:1.5rem;">🎉 No hay discrepancias en este lote.</td></tr>';
-            return;
-        }
-        discrepancies.forEach(c => {
-            tbody.innerHTML += `<tr>
-                <td><strong>${c.ubicacion}</strong></td>
-                <td>${c.material}</td>
-                <td>${c.sistema}</td>
-                <td>${c.contado}</td>
-                <td style="color:var(--danger); font-weight:700;">${c.contado - c.sistema}</td>
-                <td>3/3</td>
-                <td><button class="btn btn-warning" style="padding:4px 8px;font-size:11px;" onclick="liberarUbi('${c.ubicacion}','${c.material}')">🔑 Liberar</button></td>
-            </tr>`;
-        });
-    }
-
     function liberarUbi(ubi, mat) {
         DB.conteos = DB.conteos.filter(c => !(c.ubicacion === ubi && c.material === mat));
         save(); renderReports(); alert('Ubicación liberada en terminales.');
