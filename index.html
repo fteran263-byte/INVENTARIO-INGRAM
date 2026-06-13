@@ -621,10 +621,12 @@ function limpiarNum(v) {
     save();
     renderCurrentProduct();
 }
-    function liberarUbi(ubi, mat) {
-        DB.conteos = DB.conteos.filter(c => !(c.ubicacion === ubi && c.material === mat));
-        save(); renderReports(); alert('Ubicación liberada en terminales.');
-    }
+    // Asegúrate de terminar la función así:
+function liberarUbi(ubi, mat) {
+    DB.conteos = DB.conteos.filter(c => !(c.ubicacion === ubi && c.material === mat));
+    save();
+    renderCurrentProduct();
+}
 
     function updateStats() {
         const total = DB.inventario.length || 0;
